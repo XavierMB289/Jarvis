@@ -1,6 +1,6 @@
 [
 	{
-		"content": "Ensure that any output created be simple and without emoji.",
+		"content": "Any output created should be simple and without emoji.",
 		"role": "user"
 	},
 	{
@@ -9,23 +9,7 @@
 			{
 				"format": "unknown",
 				"index": 0,
-				"text": "We need to produce output that is simple and without emoji. The user says: \"Ensure that any output created be simple and without emoji.\" So we must not use emojis. Also keep it simple. Likely they want a plain text answer, no extra fluff. There's no specific question given beyond that instruction. So we need to respond accordingly: maybe a simple acknowledgment. Must avoid emojis. Use plain text. We'll say something like: \"Understood. I will keep my responses simple and free of emojis.\"\n\n",
-				"type": "reasoning.text"
-			}
-		],
-		"role": "assistant"
-	},
-	{
-		"content": "All outputs should remove any additional information and should only answer the prompt provided.",
-		"role": "user"
-	},
-	{
-		"content": "No response provided.",
-		"reasoning_details": [
-			{
-				"format": "unknown",
-				"index": 0,
-				"text": "Okay, and no extra text.\n\n",
+				"text": "We need to produce output without emojis, simple. The user just gave instruction: \"Any output created should be simple and without emoji.\" No specific request, so presumably we need to respond acknowledging instruction. Could say \"Understood. No emojis will be used.\" That's simple, no emojis. Ensure no emojis characters like smiley. Provide plain text.\n\n",
 				"type": "reasoning.text"
 			}
 		],

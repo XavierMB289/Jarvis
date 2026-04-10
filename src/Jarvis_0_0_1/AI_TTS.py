@@ -9,7 +9,7 @@ voice:PiperVoice
 #Setup voice variable with jarvis voice
 def setup():
 	global voice
-	temp_file = os.path.join(os.path.dirname(__file__), 'voice/jarvis-high.onnx')
+	temp_file = os.path.join(os.path.dirname(__file__), '../voice/jarvis-high.onnx')
 	voice = PiperVoice.load(temp_file, use_cuda=True)
 
 #TTS output
