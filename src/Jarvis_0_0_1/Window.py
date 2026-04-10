@@ -1,8 +1,13 @@
+import os.path
 import tkinter as tk
+import easygui
+
 import AI_STT as stt
 import AI_Call as call
 import AI_TTS as tts
+import JSON_File as jfile
 import threading
+import json
 
 root: tk.Tk
 output_text: tk.Text
@@ -41,7 +46,7 @@ def setup():
 		left_frame,
 		wrap='word',
 		font=('Consolas', 10),
-		bg='#f8f8f8',
+		bg='#696969',
 		fg='#222222',
 		state='disabled'
 	)
@@ -59,7 +64,6 @@ def setup():
 			tts_thread = threading.Thread(target=tts_background_process, name="TTS_Background_Process")
 			tts_thread.start()
 	def tts_background_process():
-		global tts_thread
 		user_input = stt.end_talk()
 		write_output("[USER-TTS]: "+user_input)
 		call.add_user_input(user_input)
@@ -68,9 +72,6 @@ def setup():
 		write_output("[AI]: "+content, "#87CEEB")
 		call.add_ai_input(response)
 		tts.talk(content)
-		#Join the current backgrounded thread
-		#HAS TO BE THE FINAL STEP
-		tts_thread.join()
 
 	tts_btn = tk.Button(right_frame, text="TTS", **btn_style)
 	tts_btn.pack(pady=(10,5))
@@ -78,14 +79,27 @@ def setup():
 	tts_btn.bind("<ButtonRelease-1>", tts_on_release)
 	#New Button
 	def new_cmd():
-		return
+		call.set_messages(jfile.load(os.path.join(os.path.dirname(__file__), 'projects/PROJECT_BASELINE.proj')))
+		output_text.configure(state='normal')
+		output_text.delete('1.0', tk.END)
+		output_text.configure(state='disabled')
+		write_output("[SYSTEM]: Created new project", "red")
 	new_btn = tk.Button(right_frame, text="NEW", command=new_cmd, **btn_style)
 	new_btn.pack(pady=5)
 	#Reset Button
 	def full_reset():
-		return
+		call.reset_messages()
+		output_text.configure(state='normal')
+		output_text.delete('1.0', tk.END)
+		output_text.configure(state='disabled')
 	reset_btn = tk.Button(right_frame, text="FULL RESET", command=full_reset, **btn_style)
 	reset_btn.pack(pady=5)
+	#Save Button
+	def save():
+		user_input = easygui.enterbox("Project Name: ")
+		jfile.save(call.get_messages(), os.path.join(os.path.dirname(__file__), f'projects/{user_input}.proj'))
+	save_btn = tk.Button(right_frame, text="SAVE", command=save, **btn_style)
+	save_btn.pack(pady=5)
 	#STT Setup
 	stt.setup()
 	#TTS Setup

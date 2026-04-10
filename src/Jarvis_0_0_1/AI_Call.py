@@ -30,3 +30,11 @@ def add_ai_input(response):
 def reset_messages():
 	global messages
 	messages = []
+
+def get_messages() -> list:
+	global messages
+	return messages
+
+def set_messages(msgs:list):
+	global messages
+	messages = msgs
