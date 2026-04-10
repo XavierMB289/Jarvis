@@ -29,6 +29,13 @@ def write_output(message: str, color: str = "black"):
 	output_text.see(tk.END)
 	output_text.configure(state='disabled')
 
+def reset_output(sys_text: str):
+	global output_text
+	output_text.configure(state='normal')
+	output_text.delete('1.0', tk.END)
+	output_text.configure(state='disabled')
+	write_output(f"[SYSTEM]: {sys_text}", "red")
+
 def setup():
 	global root, output_text, btn_style, tts_thread
 	#Window
@@ -69,7 +76,7 @@ def setup():
 		call.add_user_input(user_input)
 		response = call.call()
 		content = response.get("content")
-		write_output("[AI]: "+content, "#87CEEB")
+		write_output("[AI]: "+content, "#87CEEB") # I was able to get an output that said it liked this color
 		call.add_ai_input(response)
 		tts.talk(content)
 
@@ -80,26 +87,30 @@ def setup():
 	#New Button
 	def new_cmd():
 		call.set_messages(jfile.load(os.path.join(os.path.dirname(__file__), 'projects/PROJECT_BASELINE.proj')))
-		output_text.configure(state='normal')
-		output_text.delete('1.0', tk.END)
-		output_text.configure(state='disabled')
-		write_output("[SYSTEM]: Created new project", "red")
+		reset_output("Loaded PROJECT_BASELINE.proj")
+
 	new_btn = tk.Button(right_frame, text="NEW", command=new_cmd, **btn_style)
 	new_btn.pack(pady=5)
 	#Reset Button
 	def full_reset():
 		call.reset_messages()
-		output_text.configure(state='normal')
-		output_text.delete('1.0', tk.END)
-		output_text.configure(state='disabled')
+		reset_output("FULL RESET COMPLETE")
 	reset_btn = tk.Button(right_frame, text="FULL RESET", command=full_reset, **btn_style)
 	reset_btn.pack(pady=5)
 	#Save Button
 	def save():
 		user_input = easygui.enterbox("Project Name: ")
 		jfile.save(call.get_messages(), os.path.join(os.path.dirname(__file__), f'projects/{user_input}.proj'))
+		reset_output(f"Saved Project to {user_input}.proj")
 	save_btn = tk.Button(right_frame, text="SAVE", command=save, **btn_style)
 	save_btn.pack(pady=5)
+	#Load Button
+	def load():
+		user_input = easygui.enterbox("Project Name: ")
+		call.set_messages(jfile.load(os.path.join(os.path.dirname(__file__), f'projects/{user_input}.proj')))
+		reset_output(f"Loaded Project {user_input}.proj")
+	load_btn = tk.Button(right_frame, text="LOAD", command=load, **btn_style)
+	load_btn.pack(pady=5)
 	#STT Setup
 	stt.setup()
 	#TTS Setup
