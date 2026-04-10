@@ -3,11 +3,8 @@ import tkinter as tk
 import easygui
 
 import AI_STT as stt
-import AI_Call as call
-import AI_TTS as tts
-import JSON_File as jfile
+from src.shared import AI_Call as call, JSON_File as jfile, AI_TTS as tts
 import threading
-import json
 
 root: tk.Tk
 output_text: tk.Text
