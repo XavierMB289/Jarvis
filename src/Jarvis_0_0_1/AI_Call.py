@@ -1,8 +1,15 @@
+import os
+
 import requests
 import json
+import JSON_File as jfile
 
 
 messages = []
+
+def setup():
+	global messages
+	messages = jfile.load(os.path.join(os.path.dirname(__file__), 'projects/PROJECT_BASELINE.proj'))
 
 def call() -> dict:
 	global messages

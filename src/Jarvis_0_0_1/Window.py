@@ -111,6 +111,8 @@ def setup():
 		reset_output(f"Loaded Project {user_input}.proj")
 	load_btn = tk.Button(right_frame, text="LOAD", command=load, **btn_style)
 	load_btn.pack(pady=5)
+	#Call Setup
+	call.setup()
 	#STT Setup
 	stt.setup()
 	#TTS Setup
