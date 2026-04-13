@@ -1,3 +1,7 @@
 This is the implementation of Jarvis IRL.
 
 The goal of this project is to streamline office work and multitasking.
+
+To generate a key for use with this project, use openrouter.ai
+
+Add the command args "--api-key <API-KEY>"

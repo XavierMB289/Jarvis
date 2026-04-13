@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 
-from torch import AnyType
-
 
 def save(data, file_path: str):
 	output_path = Path(file_path)
@@ -16,7 +14,7 @@ def save(data, file_path: str):
 			ensure_ascii=False
 		)
 
-def load(file_path: str) -> AnyType:
+def load(file_path: str):
 	path = Path(file_path)
 
 	if not path.is_file():

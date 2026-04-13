@@ -3,7 +3,7 @@ import tkinter as tk
 import easygui
 
 import AI_STT as stt
-from src.shared import AI_Call as call, JSON_File as jfile, AI_TTS as tts
+from src.Jarvis_0_0_1 import AI_Call as call, JSON_File as jfile, AI_TTS as tts
 import threading
 
 root: tk.Tk

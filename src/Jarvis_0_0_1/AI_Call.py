@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 import requests
 import json
@@ -6,17 +6,22 @@ import JSON_File as jfile
 
 
 messages = []
+API_KEY: str
 
 def setup():
-	global messages
+	global messages, API_KEY
 	messages = jfile.load(os.path.join(os.path.dirname(__file__), 'projects/PROJECT_BASELINE.proj'))
+	args = sys.argv
+	for i in range(len(args)):
+		if args[i].startswith('--api-key'):
+			API_KEY = args[i+1]
 
 def call() -> dict:
-	global messages
+	global messages, API_KEY
 	return requests.post(
 		url="https://openrouter.ai/api/v1/chat/completions",
 		headers={
-			"Authorization": "Bearer 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",
+			"Authorization": "Bearer "+API_KEY,
 			"Content-Type": "application/json"
 		},
 		data=json.dumps({

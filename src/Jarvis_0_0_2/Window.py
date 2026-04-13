@@ -1,9 +1,18 @@
 import datetime
 import tkinter as tk
+from threading import Thread
 from tkinter import filedialog
+
+import easygui
+
+from AI_Call import AIConnect
+from JSON_File import JFile
+from AI_STT import SpeechToText
+from AI_TTS import TextToSpeech
 
 
 class LogWindow(tk.Tk):
+	#Initializes Variables used in LogWindow
 	def __init__(self):
 		#Initializing the Window
 		super().__init__()
@@ -32,6 +41,33 @@ class LogWindow(tk.Tk):
 		self.text_log.configure(yscrollcommand=self.scrollbar.set)
 		#Menu Bar Setup
 		self._create_menu()
+		#AI Connect Setup
+		self.ai_connect = AIConnect()
+		#TextToSpeech Setup
+		self.tts = TextToSpeech()
+		#SpeechToText Setup
+		self.stt = SpeechToText()
+		self.stt.start()
+		#Window Closing Setup
+		def on_closing():
+			self.tts.end_talk()
+			self.stt.stop()
+			self.destroy()
+		self.protocol("WM_DELETE_WINDOW", on_closing)
+		def window_check():
+			while self.stt.is_running():
+				data = self.stt.read_audio()
+				if not data is None:
+					ai_output = self.ai_connect.add_ai_input(data)
+					self.ai_write(ai_output)
+					self.tts.talk(ai_output)
+
+		self.thread = Thread(target=window_check, name="STT_Check_For_Window")
+		self.thread.start()
+		#Starting Main Tkinters Loop
+		self.mainloop()
+
+	#Creates the menubar for the window
 	def _create_menu(self):
 		menubar = tk.Menu(self)
 		self.config(menu=menubar)
@@ -107,13 +143,25 @@ class LogWindow(tk.Tk):
 
 	#FILE HANDLERS
 	def _new_proj(self):
-		return
+		self._clear_log()
+		self.ai_connect.soft_reset_messages()
+
 	def _save_proj(self):
-		return
+		proj_name = easygui.enterbox("Project Name: ")
+		JFile(f'projects/{proj_name}.proj').save(self.ai_connect.get_messages())
+		self.system_write(f"Project saved at {proj_name}!")
+
 	def _load_proj(self):
-		return
+		proj_name = easygui.enterbox("Project Name: ")
+		self.ai_connect.set_messages(JFile(f'projects/{proj_name}.proj').load())
+		self._clear_log()
+		self.system_write(f"Project {proj_name} loaded!")
+
 	def _full_reset(self):
-		return
+		self.ai_connect.hard_reset_messages()
+		self._clear_log()
+		self.system_write("FULL RESET COMPLETE")
+
 	#OPTIONS HANDLERS
 	def _show_settings(self):
 		return
