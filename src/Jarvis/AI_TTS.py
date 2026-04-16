@@ -7,7 +7,7 @@ import os
 class TextToSpeech:
 	def __init__(self):
 		self.voice = PiperVoice.load(
-			os.path.join(os.path.dirname(__file__), '../voice/jarvis-high.onnx'),
+			os.path.join(os.path.dirname(__file__), 'voice/jarvis-high.onnx'),
 			use_cuda=True
 		)
 		self.listening = False
