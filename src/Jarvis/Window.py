@@ -7,8 +7,9 @@ import easygui
 
 from AI_Call import AIConnect
 from JSON_File import JFile
-from AI_STT import SpeechToText
+#from AI_STT import SpeechToText
 from AI_TTS import TextToSpeech
+from NEW_STT import SpeechToText
 
 
 class LogWindow(tk.Tk):
@@ -49,20 +50,21 @@ class LogWindow(tk.Tk):
 		#Window Closing Setup
 		def on_closing():
 			self.tts.end_talk()
+			self.stt.stop()
 			self.destroy()
 		self.protocol("WM_DELETE_WINDOW", on_closing)
 		# SpeechToText Setup
-		self.stt = SpeechToText()
+		self.stt = SpeechToText(self)
 		#Starting Main Tkinters Loop
 		self.mainloop()
 
 	#Creates the menubar for the window
 	def _create_menu(self):
-		menubar = tk.Menu(self)
-		self.config(menu=menubar)
+		self.menubar = tk.Menu(self)
+		self.config(menu=self.menubar)
 		#File Menu
-		file_menu = tk.Menu(menubar, tearoff=False)
-		menubar.add_cascade(label="File", menu=file_menu)
+		file_menu = tk.Menu(self.menubar, tearoff=False)
+		self.menubar.add_cascade(label="File", menu=file_menu)
 		file_menu.add_command(label="New Project", command=self._new_proj)
 		file_menu.add_command(label="Save Project", command=self._save_proj)
 		file_menu.add_command(label="Load Project", command=self._load_proj)
@@ -71,11 +73,12 @@ class LogWindow(tk.Tk):
 		file_menu.add_separator()
 		file_menu.add_command(label="Clear Log", command=self._clear_log)
 		file_menu.add_command(label="Save Log", command=self._save_log)
+		file_menu.add_command(label="REMOVE LAST", command=self._remove_last)
 		# Init Options Variables
 		self._autoscroll = tk.BooleanVar(value=True)
 		# Options Menu
-		options_menu = tk.Menu(menubar, tearoff=False)
-		menubar.add_cascade(label="Options", menu=options_menu)
+		options_menu = tk.Menu(self.menubar, tearoff=False)
+		self.menubar.add_cascade(label="Options", menu=options_menu)
 		options_menu.add_checkbutton(
 			label="Auto-scroll",
 			onvalue=True,
@@ -84,15 +87,9 @@ class LogWindow(tk.Tk):
 		)
 		options_menu.add_separator()
 		options_menu.add_command(label="Settings...", command=self._show_settings)
-		#Actions Menu
-		self.action_menu = tk.Menu(menubar, tearoff=False)
-		menubar.add_cascade(label="Actions", menu=self.action_menu)
-		self.action_menu.add_command(label="Start STT", command=self._start_talk)
-		self.action_menu.add_command(label="End STT", command=self._end_talk)
-		self.action_menu.entryconfig("End STT", state=tk.DISABLED)
-		self.action_menu.add_separator()
-		self.action_menu.add_command(label="REMOVE LAST", command=self._remove_last)
-		self.action_menu.entryconfig("REMOVE LAST", state=tk.DISABLED)
+		#Recording Notifier
+		recording_notifier = tk.Menu(self.menubar, tearoff=False)
+		self.menubar.add_cascade(label="Recording...", menu=recording_notifier, state="disabled")
 
 	#LOGGING HELPERS
 	#Adds text to the end of the log
@@ -108,9 +105,16 @@ class LogWindow(tk.Tk):
 			self.text_log.see(tk.END)
 
 	#Default options for quick use
-	def system_write(self, message: str, append_newline=False): self.append_log((os.linesep if append_newline else "")+"[SYSTEM]: "+message, "red")
-	def user_write(self, message: str): self.append_log("[USER-TTS]: "+message, "black")
-	def ai_write(self, message: str): self.append_log("[JARVIS]: "+message, "#87CEEB")
+	def system_write(self, message: str, append_newline=False):
+		self.append_log((os.linesep if append_newline else "")+"[SYSTEM]: "+message, "red")
+	def user_write(self, message: str):
+		self.last_index = self.text_log.index("end -1 lines")
+		self.append_log("[USER-TTS]: "+message, "black")
+		self.ai_connect.add_user_input(message)
+		response = self.ai_connect.call()
+		self.ai_write(self.ai_connect.add_ai_input(response))
+	def ai_write(self, message: str):
+		self.append_log("[JARVIS]: "+message, "#87CEEB")
 
 	#Adding User Input, Calling AI_Connect, adding AI Input
 	def add_inputs(self, user_input: str):
@@ -168,28 +172,18 @@ class LogWindow(tk.Tk):
 		self._clear_log()
 		self.system_write("FULL RESET COMPLETE")
 
-	#OPTIONS HANDLERS
-	def _show_settings(self):
-		return
-
-	#ACTIONS HANDLERS
-	def _start_talk(self):
-		self.action_menu.entryconfig("Start STT", state=tk.DISABLED)
-		self.action_menu.entryconfig("End STT", state=tk.NORMAL)
-		self.action_menu.entryconfig("REMOVE LAST", state=tk.DISABLED)
-		self.last_index = self.text_log.index("end -1 lines")
-		self.stt.talk()
-	def _end_talk(self):
-		self.action_menu.entryconfig("End STT", state=tk.DISABLED)
-		user_input = self.stt.end_talk()
-		self.user_write(user_input)
-		self.ai_connect.add_user_input(user_input)
-		response = self.ai_connect.call()
-		self.ai_write(self.ai_connect.add_ai_input(response))
-		self.action_menu.entryconfig("Start STT", state=tk.NORMAL)
-		self.action_menu.entryconfig("REMOVE LAST", state=tk.NORMAL)
 	def _remove_last(self):
 		self.ai_connect.remove_last_set()
 		self.text_log.configure(state="normal")
 		self.text_log.delete(self.last_index, tk.END)
 		self.system_write("ITEMS REMOVED FROM RECORD", True)
+
+	#OPTIONS HANDLERS
+	def _show_settings(self):
+		return
+
+	#Recording Handlers
+	def show_recording_start(self):
+		self.menubar.entryconfig("Recording...", state=tk.NORMAL)
+	def show_recording_stop(self):
+		self.menubar.entryconfig("Recording...", state=tk.DISABLED)

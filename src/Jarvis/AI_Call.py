@@ -19,7 +19,7 @@ class AIConnect:
 
 	#Makes the call
 	def call(self) -> dict:
-		return requests.post(
+		data = requests.post(
 			url="https://openrouter.ai/api/v1/chat/completions",
 			headers={
 				"Authorization": "Bearer "+self.API_KEY,
@@ -30,7 +30,11 @@ class AIConnect:
 				"messages": self.messages,
 				"reasoning": {"enabled": True}
 			})
-		).json()['choices'][0]['message']
+		).json()
+		try:
+			return data['choices'][0]['message']
+		except KeyError:
+			print(data)
 
 	#Adds the input to messages as though the user said it
 	def add_user_input(self, user_input: str):
