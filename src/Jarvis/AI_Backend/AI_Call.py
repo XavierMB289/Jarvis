@@ -41,9 +41,8 @@ class AIConnect:
 		self.messages.append({"role": "user", "content": user_input})
 
 	#Adds the input to messages as though the AI said it
-	def add_ai_input(self, response: dict) -> str:
-		self.messages.append({"role": "assistant", "content": response.get("content"), "reasoning_details": response.get("reasoning_details")})
-		return response.get("content")
+	def add_ai_input(self, text_data: str, reasoning_details):
+		self.messages.append({"role": "assistant", "content": text_data, "reasoning_details": reasoning_details})
 
 	#Completely deletes all messages
 	def hard_reset_messages(self):

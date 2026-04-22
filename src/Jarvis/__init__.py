@@ -1,8 +1,8 @@
-from Window import LogWindow
+import src.Jarvis.Window as window
 
 
 def main():
-	window = LogWindow()
-	window.system_write("Jarvis V0.0.3")
+	win = window.LogWindow()
+	win.system_write("Jarvis V0.0.3b")
 
 main()

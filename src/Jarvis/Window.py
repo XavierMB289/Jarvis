@@ -3,13 +3,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-import easygui
-
-from AI_Call import AIConnect
-from JSON_File import JFile
-#from AI_STT import SpeechToText
-from AI_TTS import TextToSpeech
-from NEW_STT import SpeechToText
+from src.Jarvis.AI_Backend.AI_Handler import AIHandler
 
 
 class LogWindow(tk.Tk):
@@ -41,20 +35,15 @@ class LogWindow(tk.Tk):
 		)
 		self.scrollbar.grid(column=1, row=0, sticky="ns")
 		self.text_log.configure(yscrollcommand=self.scrollbar.set)
+		# AIHandler Setup
+		self.aihandler = AIHandler(self)
 		#Menu Bar Setup
 		self._create_menu()
-		#AI Connect Setup
-		self.ai_connect = AIConnect()
-		#TextToSpeech Setup
-		self.tts = TextToSpeech()
 		#Window Closing Setup
 		def on_closing():
-			self.tts.end_talk()
-			self.stt.stop()
+			self.aihandler.stop()
 			self.destroy()
 		self.protocol("WM_DELETE_WINDOW", on_closing)
-		# SpeechToText Setup
-		self.stt = SpeechToText(self)
 		#Starting Main Tkinters Loop
 		self.mainloop()
 
@@ -65,15 +54,17 @@ class LogWindow(tk.Tk):
 		#File Menu
 		file_menu = tk.Menu(self.menubar, tearoff=False)
 		self.menubar.add_cascade(label="File", menu=file_menu)
-		file_menu.add_command(label="New Project", command=self._new_proj)
-		file_menu.add_command(label="Save Project", command=self._save_proj)
-		file_menu.add_command(label="Load Project", command=self._load_proj)
+		file_menu.add_command(label="New Project", command=self.aihandler.soft_reset)
+		file_menu.add_command(label="Save Project", command=self.aihandler.save_proj)
+		file_menu.add_command(label="Load Project", command=self.aihandler.load_proj)
 		file_menu.add_separator()
-		file_menu.add_command(label="FULL RESET", command=self._full_reset)
+		file_menu.add_command(label="FULL RESET", command=self.aihandler.hard_reset)
 		file_menu.add_separator()
-		file_menu.add_command(label="Clear Log", command=self._clear_log)
+		file_menu.add_command(label="Clear Log", command=self.clear_log)
 		file_menu.add_command(label="Save Log", command=self._save_log)
-		file_menu.add_command(label="REMOVE LAST", command=self._remove_last)
+		file_menu.add_separator()
+		file_menu.add_command(label="REMOVE LAST", command=self.aihandler.remove_last)
+		file_menu.add_command(label="Advanced Entry", command=self.aihandler.adv_entry)
 		# Init Options Variables
 		self._autoscroll = tk.BooleanVar(value=True)
 		# Options Menu
@@ -105,27 +96,15 @@ class LogWindow(tk.Tk):
 			self.text_log.see(tk.END)
 
 	#Default options for quick use
-	def system_write(self, message: str, append_newline=False):
-		self.append_log((os.linesep if append_newline else "")+"[SYSTEM]: "+message, "red")
+	def system_write(self, message: str, append_newline=False): self.append_log((os.linesep if append_newline else "")+"[SYSTEM]: "+message, "red")
+	def ai_write(self, message: str): self.append_log("[JARVIS]: " + message, "#87CEEB")
 	def user_write(self, message: str):
 		self.last_index = self.text_log.index("end -1 lines")
 		self.append_log("[USER-TTS]: "+message, "black")
-		self.ai_connect.add_user_input(message)
-		response = self.ai_connect.call()
-		self.ai_write(self.ai_connect.add_ai_input(response))
-	def ai_write(self, message: str):
-		self.append_log("[JARVIS]: "+message, "#87CEEB")
-
-	#Adding User Input, Calling AI_Connect, adding AI Input
-	def add_inputs(self, user_input: str):
-		self.user_write(user_input)
-		self.ai_connect.add_user_input(user_input)
-		response = self.ai_connect.call()
-		self.ai_connect.add_ai_input(response)
-		self.ai_write(response.get("content"))
+		self.ai_write(self.aihandler.think(message))
 
 	#Clears the current log
-	def _clear_log(self):
+	def clear_log(self):
 		self.text_log.configure(state='normal')
 		self.text_log.delete(1.0, tk.END)
 		self.text_log.configure(state='disabled')
@@ -149,34 +128,6 @@ class LogWindow(tk.Tk):
 					self.system_write(f"Log saved at {filepath}")
 			except Exception as e:
 				self.system_write(f"Failed to save file:\n{e}")
-
-
-	#FILE HANDLERS
-	def _new_proj(self):
-		self._clear_log()
-		self.ai_connect.soft_reset_messages()
-
-	def _save_proj(self):
-		proj_name = easygui.enterbox("Project Name: ")
-		JFile(f'projects/{proj_name}.proj').save(self.ai_connect.get_messages())
-		self.system_write(f"Project saved at {proj_name}!")
-
-	def _load_proj(self):
-		proj_name = easygui.enterbox("Project Name: ")
-		self.ai_connect.set_messages(JFile(f'projects/{proj_name}.proj').load())
-		self._clear_log()
-		self.system_write(f"Project {proj_name} loaded!")
-
-	def _full_reset(self):
-		self.ai_connect.hard_reset_messages()
-		self._clear_log()
-		self.system_write("FULL RESET COMPLETE")
-
-	def _remove_last(self):
-		self.ai_connect.remove_last_set()
-		self.text_log.configure(state="normal")
-		self.text_log.delete(self.last_index, tk.END)
-		self.system_write("ITEMS REMOVED FROM RECORD", True)
 
 	#OPTIONS HANDLERS
 	def _show_settings(self):

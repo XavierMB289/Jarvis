@@ -4,10 +4,6 @@ See Computer it runs on
 • Allow the insertion of data from specified files
 • Create a pseudocode for output
 • Allow the output of the ai to be inserted back into the input with "changes"
-Advanced input
-• Pops open a text box to type to the ai
-• stops the STT when opening
-• restarts the STT when the ai has been outputted
 Write its own code
 • Finalize seeing the computer
 • create a json tag that creates a given python file and runs it after user check off
@@ -16,3 +12,6 @@ Updated Baselines
 • Finalize all the above
 • Have the ai check if each file in it's BASELINE folder is the "best it can be"
 • Submit the changes with user check off
+Fix STT
+• create a keyword that is listened for
+• When that keyword is heard, send the textline

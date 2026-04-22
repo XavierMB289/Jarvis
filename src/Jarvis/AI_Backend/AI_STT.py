@@ -47,7 +47,10 @@ class SpeechToText:
 		target_bytes = int(self.RATE * self.SEGMENT_SECONDS * 2)
 
 		while self.running:
-			self.window.show_recording_start()
+			try:
+				self.window.show_recording_start()
+			except AttributeError:
+				continue
 			while len(buffer) < target_bytes:
 				try:
 					data = self.audio_queue.get(timeout=1.0)
