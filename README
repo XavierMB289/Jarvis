@@ -2,6 +2,9 @@ This is the implementation of Jarvis IRL.
 
 The goal of this project is to streamline office work and multitasking.
 
-To generate a key for use with this project, use openrouter.ai
+You will need the credentials.json file generated from signing up for GoogleAPI (put it in the sensitive directory)
 
-Add the command args "--api-key <API-KEY>"
+There are no longer command variables needed when running the program.
+It will prompt you to enter in the keys/ids it needs and save them (ENCRYPTED) in the sensitive directory.
+
+As of V0.0.4, you will need Houndify and OpenAI keys/ids
