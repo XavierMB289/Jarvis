@@ -1,8 +1,8 @@
 /.venv/
 /.idea/
 /src/Jarvis/voice/jarvis-high.onnx
-/src/Jarvis/sensitive/credentials.json
 /src/Jarvis/sensitive/houndify-id.secret
 /src/Jarvis/sensitive/houndify-key.secret
 /src/Jarvis/sensitive/openai-key.secret
 /src/Jarvis/sensitive/secret.key
+/src/Jarvis/sensitive/credentials.json
