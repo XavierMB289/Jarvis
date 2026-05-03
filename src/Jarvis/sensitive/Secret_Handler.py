@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 
 class SecretHandler:
 	def __init__(self):
-		self.file_path = sys.path[0]+"\\..\\sensitive\\"
+		self.file_path = sys.path[0]+"\\sensitive\\"
 
 		if os.path.exists(self.file_path+"secret.key"):
 			with open(self.file_path+"secret.key", "rb") as f:

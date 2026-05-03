@@ -1,6 +1,5 @@
+import sys
 import tkinter as tk
-
-from src.Jarvis.AI_Backend import AI_Handler
 
 
 class LogWindow(tk.Tk):
@@ -31,14 +30,16 @@ class LogWindow(tk.Tk):
 		)
 		self.scrollbar.grid(column=1, row=0, sticky="ns")
 		self.text_log.configure(yscrollcommand=self.scrollbar.set)
-		# AIHandler Setup
-		self.aihandler = AI_Handler.ThreadedAIHandler(self)
-		#Window Closing Setup
+
+	def setup_stop(self, stopFun = None):
+		# Window Closing Setup
 		def on_closing():
-			#Keeping this logic for possible later use.
+			if stopFun is not None: stopFun()
 			self.destroy()
 		self.protocol("WM_DELETE_WINDOW", on_closing)
-		#Starting Main Tkinters Loop
+
+	def start_loop(self):
+		# Starting Main Tkinters Loop
 		self.mainloop()
 
 	#LOGGING HELPERS

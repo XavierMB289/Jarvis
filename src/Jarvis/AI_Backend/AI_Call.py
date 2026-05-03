@@ -1,6 +1,5 @@
 import json
 import sys
-import threading
 
 from openai import OpenAI
 
