@@ -6,7 +6,6 @@ from openai import OpenAI
 from src.Jarvis.AI_Backend import AI_TTS, Call_Data
 from src.Jarvis.sensitive import Secret_Handler
 
-
 class AIConnect:
 	def __init__(self):
 		self.client = None
