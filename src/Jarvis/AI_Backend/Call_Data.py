@@ -20,20 +20,16 @@ class CallHandler:
 				"parameters": {
 					"type": "object",
 					"properties": {
-						"file_name": {
-							"type": "string",
-							"description": "The name of the file including the file extension"
-						},
 						"file_path": {
 							"type": "string",
-							"description": "The relative path of the file to create"
+							"description": "The relative path of the file including the file name and extension"
 						},
 						"file_data": {
 							"type": "string",
 							"description": "The contents of the file"
 						}
 					},
-					"required": ["file_name", "file_path", "file_data"]
+					"required": ["file_path", "file_data"]
 				}
 			},
 			{
@@ -43,16 +39,12 @@ class CallHandler:
 				"parameters": {
 					"type": "object",
 					"properties": {
-						"file_name": {
-							"type": "string",
-							"description": "The name of the file including the file extension"
-						},
 						"file_path": {
 							"type": "string",
-							"description": "The relative path of the file to read"
+							"description": "The relative path of the file including the file name and extension"
 						}
 					},
-					"required": ["file_name", "file_path"]
+					"required": ["file_path"]
 				}
 			},
 			{
@@ -199,27 +191,25 @@ class CallHandler:
 		return self.service.users().getProfile(userId="me").execute().get('emailAddress')
 
 	@staticmethod
-	def create_file(file_name: str, file_path: str, file_data: str):
+	def create_file(file_path: str, file_data: str):
 		"""
 		Create a file using the given file name and file path
-		:param file_name: Name of the file
 		:param file_path: Relative path of the file
 		:param file_data: Content of the file
 		"""
-		with open(file_path+file_name, "w") as file:
+		with open(file_path, "w") as file:
 			file.write(file_data)
-		return f"File {file_name} has been created."
+		return f"File {file_path} has been created."
 
 	@staticmethod
-	def read_file(file_name: str, file_path: str) -> str:
+	def read_file(file_path: str) -> str:
 		"""
 		Read a file from the given path
-		:param file_name: Name of the file
 		:param file_path: Relative path of the file
 		:return: The contents of the file (using file.read())
 		"""
 		ret = ""
-		with open(file_path+file_name, "r") as file:
+		with open(file_path, "r") as file:
 			ret = file.read()
 		return ret
 
@@ -276,9 +266,7 @@ class CallHandler:
 			#Encoding & Sending
 			encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
 			create_draft_request_body = {"message": {"raw": encoded_message}}
-			draft = (
-				self.service.users().messages().create(userId="me", body=create_draft_request_body).execute()
-			)
+			self.service.users().messages().create(userId="me", body=create_draft_request_body).execute()
 		except HttpError as error:
 			print(f"An error occurred: {error}")
 
@@ -301,9 +289,7 @@ class CallHandler:
 			msg['Subject'] = subject
 			encoded_msg = base64.urlsafe_b64encode(msg.as_bytes()).decode()
 			create_message = {"message": {"raw": encoded_msg}}
-			draft = (
-				self.service.users().messages().send(userId="me", body=create_message).execute()
-			)
+			self.service.users().messages().send(userId="me", body=create_message).execute()
 		except HttpError as error:
 			print(f"An error occurred: {error}")
 
@@ -330,16 +316,16 @@ class CallHandler:
 
 	def create_project(self, project_name: str) -> str:
 		"""Creates a new project"""
-		if not os.path.exists(f"../projects/{project_name}/"):
-			os.makedirs(f"../projects/{project_name}/")
-			return f"Project Created at ../projects/{project_name}/"
-		return f"Project Exists at ../projects/{project_name}/"
+		if not os.path.exists(f"projects/{project_name}/"):
+			os.makedirs(f"projects/{project_name}/")
+			return f"Project Created at projects/{project_name}/"
+		return f"Project Exists at projects/{project_name}/"
 
 	def open_project(self, project_name: str) -> str:
 		"""Opens a given project"""
-		if os.path.exists(f"../projects/{project_name}/"):
-			return f"Use ../projects/{project_name}/ as the start of any needed relative file paths from now on"
-		return f"Project Not Found at ../projects/{project_name}/"
+		if os.path.exists(f"projects/{project_name}/"):
+			return f"Use 'projects/{project_name}/' as the start of any needed relative file paths from now on"
+		return f"Project Not Found at projects/{project_name}/"
 
 	def get_tools(self):
 		return self.tools

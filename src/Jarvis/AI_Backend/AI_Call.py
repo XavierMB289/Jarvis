@@ -42,14 +42,12 @@ class AIConnect:
 				data = None
 				match item.name:
 					case "create_file":
-						file_name = loaded_json["file_name"]
 						file_path = loaded_json["file_path"]
 						file_data = loaded_json["file_data"]
-						data = self.call_handler.create_file(file_name, file_path, file_data)
+						data = self.call_handler.create_file(file_path, file_data)
 					case "read_file":
-						file_name = loaded_json["file_name"]
 						file_path = loaded_json["file_path"]
-						data = self.call_handler.read_file(file_name, file_path)
+						data = self.call_handler.read_file(file_path)
 					case "delete_file":
 						file_name = loaded_json["file_name"]
 						file_path = loaded_json["file_path"]
@@ -89,7 +87,7 @@ class AIConnect:
 			print(self.input_list)
 		response = self.client.responses.create(
 			model="gpt-5.4-mini",
-			instructions="Respond with a summary of everything done.",
+			instructions="Respond with a simple summary of everything that was just completed.",
 			tools=self.call_handler.get_tools(),
 			input=self.input_list
 		)

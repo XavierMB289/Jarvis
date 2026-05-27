@@ -16,4 +16,5 @@ def main():
 	win.system_write("Jarvis V0.0.4")
 	win.start_loop()
 
-main()
+if __name__ == "__main__":
+	main()
