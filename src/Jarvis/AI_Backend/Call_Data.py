@@ -2,6 +2,7 @@ import mimetypes
 import os
 
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 import base64
 from email.message import EmailMessage
@@ -229,14 +230,21 @@ class CallHandler:
 		Creates the GMAIL connection needed to send emails/texts
 		:param message: A "test" message
 		"""
+		if os.path.exists("sensitive/token.json"):
+			self.creds = Credentials.from_authorized_user_file("sensitive/token.json", [
+				"https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/userinfo.email"
+			])
 		if not self.creds or not self.creds.valid:
-			self.creds.refresh(Request())
-		else:
-			flow = InstalledAppFlow.from_client_secrets_file(
+			if self.creds and self.creds.expired and self.creds.refresh_token:
+				self.creds.refresh(Request())
+			else:
+				flow = InstalledAppFlow.from_client_secrets_file(
 				"sensitive/credentials.json",
 				["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/userinfo.email"]
-			)
-			self.creds = flow.run_local_server(port=0)
+				)
+				self.creds = flow.run_local_server(port=0)
+			with open("sensitive/token.json", "w") as file:
+				file.write(self.creds.to_json())
 		self.service = build("gmail", "v1", credentials=self.creds)
 		self.send_email("JARVIS TEST EMAIL", message)
 		return "Connection to email services established successfully"
