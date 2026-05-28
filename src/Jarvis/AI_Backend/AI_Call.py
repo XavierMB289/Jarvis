@@ -32,7 +32,7 @@ class AIConnect:
 		response = self.client.responses.create(
 			model="gpt-5.4-mini",
 			tools=self.call_handler.get_tools(),
-			instructions="Respond with a simple summary of everything that was just asked to be done. Use only the alphabet in your response.",
+			instructions="Respond with a simple summary of everything that was just asked to be done. Use only alpha-numeric characters in your response.",
 			input=self.inputs
 		)
 		self.inputs += response.output
