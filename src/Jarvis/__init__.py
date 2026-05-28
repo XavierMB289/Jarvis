@@ -13,7 +13,7 @@ def main():
 	win = window.LogWindow()
 	aih = AI_Handler.ThreadedAIHandler(win)
 	win.setup_stop(aih.stop)
-	win.system_write("Jarvis V0.0.4")
+	win.system_write("Jarvis V0.0.5")
 	win.start_loop()
 
 if __name__ == "__main__":

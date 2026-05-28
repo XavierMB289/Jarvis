@@ -1,6 +1,9 @@
 import mimetypes
 import os
+from tkinter import filedialog
+from urllib.parse import unquote
 
+import win32com.client
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -145,30 +148,11 @@ class CallHandler:
 			},
 			{
 				"type": "function",
-				"name": "create_project",
-				"description": "Creates a new directory to contain any new files created until a new project is opened",
+				"name": "look_here",
+				"description": "Tells you where to look and gets a file path to it",
 				"parameters": {
 					"type": "object",
-					"properties": {
-						"project_name": {
-							"type": "string",
-							"description": "The name of the project"
-						}
-					}
-				}
-			},
-			{
-				"type": "function",
-				"name": "open_project",
-				"description": "Opens a project folder",
-				"parameters": {
-					"type": "object",
-					"properties": {
-						"project_name": {
-							"type": "string",
-							"description": "The name of the project"
-						}
-					}
+					"properties": {  }
 				}
 			}
 		]
@@ -209,7 +193,6 @@ class CallHandler:
 	def delete_file(file_path: str) -> None:
 		"""
 		Delete a file from the given path
-		:param file_name: File Name with the extension
 		:param file_path: Relative path of the file
 		"""
 		if os.path.exists(file_path):
@@ -306,16 +289,21 @@ class CallHandler:
 		if not carrier in CARRIERS: raise Exception("Invalid Carrier specified: "+carrier)
 		self.send_email("JARVIS", message, phone_number+CARRIERS[carrier])
 
-	def create_project(self, project_name: str) -> None:
-		"""Creates a new project"""
-		if not os.path.exists(f"projects/{project_name}/"):
-			os.makedirs(f"projects/{project_name}/")
+	def look_here(self) -> str:
+		shell = win32com.client.Dispatch("Shell.Application")
 
-	def open_project(self, project_name: str) -> str:
-		"""Opens a given project"""
-		if os.path.exists(f"projects/{project_name}/"):
-			return f"Use 'projects/{project_name}/' as the start of any needed relative file paths from now on"
-		return f"Project Not Found at projects/{project_name}/"
+		print("THIS USES FILE EXPLORER TO \"CHEAT\". Leave it open to make it easier, or close it to use the directory asker")
+
+		windows = shell.Windows()
+		for window in windows:
+			if "explorer.exe" in window.FullName.lower():
+				url = window.LocationURL
+				if url:
+					path = unquote(url[8:].replace("|", ":"))
+					return f"Use '{path}' as the relative filepath when needed."
+		folder_selected = filedialog.askdirectory(title="Select a folder")
+		os.startfile(folder_selected)
+		return f"Use '{folder_selected}' as the relative filepath when needed."
 
 	def get_tools(self):
 		return self.tools

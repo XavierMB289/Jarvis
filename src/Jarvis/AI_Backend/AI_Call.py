@@ -68,15 +68,11 @@ class AIConnect:
 						number = loaded_json["phone_number"]
 						carrier = loaded_json["carrier"]
 						self.call_handler.text_user(message, number, carrier)
-					case "create_project":
-						name = loaded_json["project_name"]
-						self.call_handler.create_project(name)
-					case "open_project":
-						name = loaded_json["project_name"]
+					case "look_here":
 						self.inputs.append({
 							"type": "function_call_output",
 							"call_id": item.call_id,
-							"output": self.call_handler.open_project(name)
+							"output": self.call_handler.look_here()
 						})
 		if self.debug:
 			print("Created Input List:\n"+str(self.inputs))
