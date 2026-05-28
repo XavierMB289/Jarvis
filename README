@@ -7,7 +7,7 @@ You will need the credentials.json file generated from signing up for GoogleAPI 
 There are no longer command variables needed when running the program.
 It will prompt you to enter in the keys/ids it needs and save them (ENCRYPTED) in the sensitive directory.
 
-As of V0.0.4, you will need Houndify and OpenAI keys/ids
-
-Last Update 5/4/2026
-Unable to test due to funding...
+As of V0.0.4, you will need:
+&bull; Houndify keys/ids
+&bull; OpenAI keys/ids
+&bull; Google API credentials.json file

@@ -55,16 +55,12 @@ class CallHandler:
 				"parameters": {
 					"type": "object",
 					"properties": {
-						"file_name": {
-							"type": "string",
-							"description": "The name of the file including the file extension"
-						},
 						"file_path": {
 							"type": "string",
-							"description": "The relative path of the file to delete"
+							"description": "The relative path of the file including the file name and extension"
 						}
 					},
-					"required": ["file_name", "file_path"]
+					"required": ["file_path"]
 				}
 			},
 			{
@@ -89,20 +85,16 @@ class CallHandler:
 				"parameters": {
 					"type": "object",
 					"properties": {
-						"file_name": {
-							"type": "string",
-							"description": "The name of the file including the file extension"
-						},
 						"file_path": {
 							"type": "string",
-							"description": "The relative path of the file to send"
+							"description": "The relative path of the file including the file name and extension"
 						},
 						"email": {
 							"type": "string",
 							"description": "The e-mail address to send the file to"
 						}
 					},
-					"required": ["file_name", "file_path"]
+					"required": ["file_path"]
 				}
 			},
 			{
@@ -192,7 +184,7 @@ class CallHandler:
 		return self.service.users().getProfile(userId="me").execute().get('emailAddress')
 
 	@staticmethod
-	def create_file(file_path: str, file_data: str):
+	def create_file(file_path: str, file_data: str) -> None:
 		"""
 		Create a file using the given file name and file path
 		:param file_path: Relative path of the file
@@ -200,7 +192,6 @@ class CallHandler:
 		"""
 		with open(file_path, "w") as file:
 			file.write(file_data)
-		return f"File {file_path} has been created."
 
 	@staticmethod
 	def read_file(file_path: str) -> str:
@@ -215,17 +206,16 @@ class CallHandler:
 		return ret
 
 	@staticmethod
-	def delete_file(file_name: str, file_path: str):
+	def delete_file(file_path: str) -> None:
 		"""
 		Delete a file from the given path
 		:param file_name: File Name with the extension
 		:param file_path: Relative path of the file
 		"""
-		if os.path.exists(file_path+file_name):
-			os.remove(file_path+file_name)
-		return f"File {file_path+file_name} was deleted."
+		if os.path.exists(file_path):
+			os.remove(file_path)
 
-	def create_connections(self, message: str):
+	def create_connections(self, message: str) -> None:
 		"""
 		Creates the GMAIL connection needed to send emails/texts
 		:param message: A "test" message
@@ -247,16 +237,14 @@ class CallHandler:
 				file.write(self.creds.to_json())
 		self.service = build("gmail", "v1", credentials=self.creds)
 		self.send_email("JARVIS TEST EMAIL", message)
-		return "Connection to email services established successfully"
 
-	def send_file(self, file_name: str, file_path: str, email: str = None) -> str:
+	def send_file(self, file_path: str, email: str = None) -> None:
 		"""
 		Send a file from the given path through email.
-		:param file_name: The name of the file including the file extension
 		:param file_path: The relative path of the file to send
 		:param email: The email address to send the message to. If None (or not provided), the user is assumed
 		"""
-		if self.creds is None: return "You must create connections before sending a file"
+		if self.creds is None: return
 		try:
 			userEmail = self.__get_user_email()
 			#Email Setup
@@ -266,9 +254,11 @@ class CallHandler:
 			mime_message['Subject'] = "FILE FROM JARVIS"
 			mime_message.set_content("Please see attached file")
 			#File attachments
-			type_subtype, _ = mimetypes.guess_type(file_name)
+			file_name = file_path.split("/")
+			file_name = file_name[len(file_name) - 1]
+			type_subtype, _ = mimetypes.guess_type(file_path)
 			maintype, subtype = type_subtype.split("/")
-			with open(file_path+file_name, "rb") as file:
+			with open(file_path, "rb") as file:
 				attachment_data = file.read()
 			mime_message.add_attachment(attachment_data, maintype=maintype, subtype=subtype, filename=file_name)
 			#Encoding & Sending
@@ -278,16 +268,14 @@ class CallHandler:
 		except HttpError as error:
 			print(f"An error occurred: {error}")
 
-		return "File Sent Successfully"
-
-	def send_email(self, subject:str, message: str, email: str = None) -> str:
+	def send_email(self, subject:str, message: str, email: str = None) -> None:
 		"""
 		Creates an email and sends it to the given email or the user
 		:param subject: The subject of the email
 		:param message: The body of the email. Can use HTML formatting
 		:param email: Email address to send the message to. If None (or not provided), the user is assumed
 		"""
-		if self.creds is None: return "You must create connections before sending an email"
+		if self.creds is None: return
 		try:
 			userEmail = self.__get_user_email()
 			msg = EmailMessage()
@@ -301,16 +289,14 @@ class CallHandler:
 		except HttpError as error:
 			print(f"An error occurred: {error}")
 
-		return "Email Sent Successfully"
-
-	def text_user(self, message: str, phone_number: str, carrier: str) -> str:
+	def text_user(self, message: str, phone_number: str, carrier: str) -> None:
 		"""
 		Sends a text message to the given phone number
 		:param message: Message to send
 		:param phone_number: Phone number to send the message to (XXX-XXX-XXXX)
 		:param carrier: Phone carrier. All lowercase. Alphabet only.
 		"""
-		if self.creds is None: return "You must create connections before sending a text"
+		if self.creds is None: return
 		CARRIERS = {
 			"att": "@mms.att.net",
 			"tmobile": "@tmomail.net",
@@ -320,14 +306,10 @@ class CallHandler:
 		if not carrier in CARRIERS: raise Exception("Invalid Carrier specified: "+carrier)
 		self.send_email("JARVIS", message, phone_number+CARRIERS[carrier])
 
-		return "Text Sent Successfully"
-
-	def create_project(self, project_name: str) -> str:
+	def create_project(self, project_name: str) -> None:
 		"""Creates a new project"""
 		if not os.path.exists(f"projects/{project_name}/"):
 			os.makedirs(f"projects/{project_name}/")
-			return f"Project Created at projects/{project_name}/"
-		return f"Project Exists at projects/{project_name}/"
 
 	def open_project(self, project_name: str) -> str:
 		"""Opens a given project"""
